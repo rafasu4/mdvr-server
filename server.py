@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -13,8 +14,12 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     data = request.get_json()
-    ans = mdvr(data.get('voters'), data.get('voters_type'), data.get('alternatives'), data.get('voters_preferences'), 'null', data.get('remaining_rounds'), False)
-    print(data)
+    cud = ConsensusUnderDeadline(data.get('voters'), data.get('voters_type'), data.get('alternatives'), data.get('voters_preferences'), 'null', data.get('remaining_rounds'), False)
+    winner = cud.deploy_algorithm();
+    ans = {
+        cud.data,
+        winner
+    }
     return jsonify(status='success', message=ans)
 
 
@@ -23,7 +28,7 @@ import logging
 from collections import Counter
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, filename='logs.txt', filemode='a')
 logger = logging.getLogger()
 
 def mdvr(voters: tuple, voters_type: tuple, alternatives: tuple, voters_preferences: list,
@@ -116,6 +121,7 @@ class ConsensusUnderDeadline():
             raise ValueError(f'''time can't be negative''')
         self.remaining_rounds = remaining_rounds
         self.random_selection = random_selection
+        self.data ={}
 
     def deploy_algorithm(self):
         '''
@@ -174,6 +180,11 @@ class ConsensusUnderDeadline():
                     return key
             # all the alternative who's possible to be elected
             possible_winners = self.possible_winners()
+            self.data[self.remaining_rounds + 1] = {
+                    'voters_ballot': self.voters_current_ballot,
+                    'scores': current_votes_score,
+                    'possible_winners': possible_winners
+            }
             logger.debug('round number: %g', self.remaining_rounds)
             # if no alternative is eligible to win - no need to keep iterating
             if possible_winners == [self.default_alternative]:
