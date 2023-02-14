@@ -15,11 +15,8 @@ def index():
 def submit():
     data = request.get_json()
     cud = ConsensusUnderDeadline(data.get('voters'), data.get('voters_type'), data.get('alternatives'), data.get('voters_preferences'), 'null', data.get('remaining_rounds'), False)
-    winner = cud.deploy_algorithm();
-    ans = {
-        cud.data,
-        winner
-    }
+    winner = cud.deploy_algorithm()
+    ans = (cud.data, winner)
     return jsonify(status='success', message=ans)
 
 
