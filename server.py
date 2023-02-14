@@ -118,7 +118,7 @@ class ConsensusUnderDeadline():
             raise ValueError(f'''time can't be negative''')
         self.remaining_rounds = remaining_rounds
         self.random_selection = random_selection
-        self.data ={}
+        self.data = [] # holds data to client side
 
     def deploy_algorithm(self):
         '''
@@ -177,11 +177,12 @@ class ConsensusUnderDeadline():
                     return key
             # all the alternative who's possible to be elected
             possible_winners = self.possible_winners()
-            self.data[self.remaining_rounds + 1] = {
+            self.data.append({
+                    'round': self.remaining_rounds + 1,
                     'voters_ballot': self.voters_current_ballot,
                     'scores': current_votes_score,
                     'possible_winners': possible_winners
-            }
+            })
             logger.debug('round number: %g', self.remaining_rounds)
             # if no alternative is eligible to win - no need to keep iterating
             if possible_winners == [self.default_alternative]:
