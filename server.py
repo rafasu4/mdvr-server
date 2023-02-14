@@ -172,10 +172,7 @@ class ConsensusUnderDeadline():
             self.round_passed()  # mark this round as passed
             current_votes_score = ConsensusUnderDeadline.votes_calculate(
                 self.voters_current_ballot)
-            for key, value in current_votes_score.items():
-                if value == unanimously:
-                    return key
-            # all the alternative who's possible to be elected
+             # all the alternative who's possible to be elected
             possible_winners = self.possible_winners()
             self.data.append({
                     'round': self.remaining_rounds + 1,
@@ -183,6 +180,9 @@ class ConsensusUnderDeadline():
                     'scores': current_votes_score,
                     'possible_winners': possible_winners
             })
+            for key, value in current_votes_score.items():
+                if value == unanimously:
+                    return key
             logger.debug('round number: %g', self.remaining_rounds)
             # if no alternative is eligible to win - no need to keep iterating
             if possible_winners == [self.default_alternative]:
@@ -394,3 +394,4 @@ class ConsensusUnderDeadline():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
