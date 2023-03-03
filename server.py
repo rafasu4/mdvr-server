@@ -24,7 +24,7 @@ def submit():
     # reset the content of the log file
     with open('logs.txt', 'w'):
         pass
-    ans = (cud.data, winner, logs, 1)
+    ans = (cud.data, winner, logs)
     return jsonify(status='success', message=ans)
 
 
