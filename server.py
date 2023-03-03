@@ -16,7 +16,15 @@ def submit():
     data = request.get_json()
     cud = ConsensusUnderDeadline(data.get('voters'), data.get('voters_type'), data.get('alternatives'), data.get('voters_preferences'), 'null', data.get('remaining_rounds'), False)
     winner = cud.deploy_algorithm()
-    ans = (cud.data, winner)
+    logs = []
+    with open('logs.txt', 'r') as f:
+        for line in f:
+            if 'INFO' in line:
+                logs.append(line)
+    # reset the content of the log file
+    with open('logs.txt', 'w'):
+        pass
+    ans = (cud.data, winner, logs)
     return jsonify(status='success', message=ans)
 
 
@@ -95,7 +103,7 @@ class ConsensusUnderDeadline():
                 remaining_rounds - a threshold for the amount if rounds left until decision should be taken
                 random_selection - whether the selection of voter for changing their ballot. If False - the smallest voter's number will be selected
         '''
-        logger.info('ConsensusUnderDeadline object created')
+        logger.debug('ConsensusUnderDeadline object created')
         if len(tuple(set(voters))) != len(voters):
             raise ValueError('each voter must have unique id')
         self.voters = voters
@@ -162,11 +170,11 @@ class ConsensusUnderDeadline():
             >>> print(cud.deploy_algorithm())
             null
         '''
-        logger.info('deploying algorithm')
+        logger.debug('deploying algorithm')
         # the required score for an alternative to win
         unanimously = len(self.voters)
-        logger.debug('required votes for unanimously: %g', unanimously)
-        logger.debug('round number: %g', self.remaining_rounds)
+        logger.info('required votes for unanimously: %g', unanimously)
+        logger.info('round number: %g', self.remaining_rounds)
         while self.remaining_rounds >= 0:
             logger.debug('voters have cast their ballots')
             self.round_passed()  # mark this round as passed
@@ -183,10 +191,10 @@ class ConsensusUnderDeadline():
             for key, value in current_votes_score.items():
                 if value == unanimously:
                     return key
-            logger.debug('round number: %g', self.remaining_rounds)
+            logger.info('round number: %g', self.remaining_rounds)
             # if no alternative is eligible to win - no need to keep iterating
             if possible_winners == [self.default_alternative]:
-                logger.debug(
+                logger.info(
                     'possible winners: %s. Algorithm is finished with no winner', self.default_alternative)
                 break
             # if only one option is valid
@@ -200,11 +208,11 @@ class ConsensusUnderDeadline():
                 # if voter's current vote isn't eligible to win - mark him as wishes to change ballot
                 if self.voters_current_ballot.get(voter_index + 1) not in possible_winners:
                     voters_candidate.append(voter)
-                    logger.debug('voter %g wishes to change his ballot', voter)
+                    logger.info('voter %g wishes to change his ballot', voter)
                 # if voter is active and he has more winners candidate alternatives to vote for
                 elif voter_type == 1 and len(possible_winners) != 1:
                     voters_candidate.append(voter)
-                    logger.debug('voter %g wishes to change his ballot', voter)
+                    logger.info('voter %g wishes to change his ballot', voter)
             if len(voters_candidate) != 0:
                 ballot_change_voter = self.choose_random_voter(
                     voters_candidate)
@@ -273,7 +281,7 @@ class ConsensusUnderDeadline():
             >>> print(cud.possible_winners())
             ['b']
         '''
-        logger.info('calculating possible winners alternatives')
+        logger.debug('calculating possible winners alternatives')
         unanimously = len(
             self.voters)  # the amount of votes needed to reach consensus
         current_votes_score = ConsensusUnderDeadline.votes_calculate(
@@ -283,8 +291,8 @@ class ConsensusUnderDeadline():
             if alter not in current_votes_score:
                 current_votes_score[alter] = 0
         possible_winners_alters = []
-        logger.debug('total votes: %g', unanimously)
-        logger.debug('current vote scores: %s', current_votes_score)
+        logger.info('total votes: %g', unanimously)
+        logger.info('current vote scores: %s', current_votes_score)
         for alt, score in current_votes_score.items():
             # if an alternative has a chance to get the remaining votes in the remaining time
             if (score + self.remaining_rounds + 1) >= unanimously:
@@ -294,7 +302,7 @@ class ConsensusUnderDeadline():
         # if none of the alternatives has a chance to be chosen - return default alternative
         if len(possible_winners_alters) == 0:
             return [self.default_alternative]
-        logger.debug('possible winners: %s', possible_winners_alters)
+        logger.info('possible winners: %s', possible_winners_alters)
         return possible_winners_alters
 
     def change_vote(self, voter: int, new_vote: str, current_vote: str):
@@ -386,12 +394,5 @@ class ConsensusUnderDeadline():
         '''
         return dict(Counter(ballots.values()))
 
-
-
-# if __name__ == "__main__":
-    # app.run(debug=True, host='0.0.0.0', port= 8888)
-
-
 if __name__ == "__main__":
     app.run(debug=True)
-    
