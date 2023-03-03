@@ -174,6 +174,8 @@ class ConsensusUnderDeadline():
         # the required score for an alternative to win
         unanimously = len(self.voters)
         logger.info('required votes for unanimously: %g', unanimously)
+        for i, pref in enumerate(self.voters_preferences):
+            logger.info('voter %s preference: %s', i+1, pref)
         logger.info('round number: %g', self.remaining_rounds)
         while self.remaining_rounds >= 0:
             logger.debug('voters have cast their ballots')
@@ -214,8 +216,7 @@ class ConsensusUnderDeadline():
                     voters_candidate.append(voter)
                     logger.info('voter %g wishes to change his ballot', voter)
             if len(voters_candidate) != 0:
-                ballot_change_voter = self.choose_random_voter(
-                    voters_candidate)
+                ballot_change_voter = self.choose_random_voter(voters_candidate)
                 ballot_change_voter_preference = self.voters_preferences[ballot_change_voter - 1]
                 voter_current_ballot = self.voters_current_ballot[ballot_change_voter]
                 # voter chooses to change his ballot to the top possible alternative (besides his current)
@@ -396,3 +397,12 @@ class ConsensusUnderDeadline():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    # v = (1, 2, 3, 4, 5)
+    # v_type = (1, 1, 1, 1, 1)
+    # alters = ('a', 'b', 'c', 'd')
+    # df_alter = 'null'
+    # v_cur_ballot = {1: 'a', 2:'a', 3:'b', 4:'b', 5:'c' }
+    # vp =[['a', 'b', 'c', 'd'], ['a', 'c', 'b', 'd'], ['b', 'c', 'a', 'd'], ['b', 'a', 'c', 'd'], ['c', 'b', 'd', 'a']]
+    # t = 4
+    # cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
+    # cud.deploy_algorithm()
