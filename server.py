@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import json
+import copy
 
 app = Flask(__name__)
 CORS(app)
@@ -186,10 +186,11 @@ class ConsensusUnderDeadline():
             possible_winners = self.possible_winners()
             self.data.append({
                     'round': self.remaining_rounds + 1,
-                    'voters_ballot': self.voters_current_ballot,
+                    'voters_ballot': copy.deepcopy(self.voters_current_ballot),
                     'scores': current_votes_score,
                     'possible_winners': possible_winners
             })
+            print(self.data)
             for key, value in current_votes_score.items():
                 if value == unanimously:
                     return key
@@ -396,13 +397,13 @@ class ConsensusUnderDeadline():
         return dict(Counter(ballots.values()))
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    # v = (1, 2, 3, 4, 5)
-    # v_type = (1, 1, 1, 1, 1)
-    # alters = ('a', 'b', 'c', 'd')
-    # df_alter = 'null'
-    # v_cur_ballot = {1: 'a', 2:'a', 3:'b', 4:'b', 5:'c' }
-    # vp =[['a', 'b', 'c', 'd'], ['a', 'c', 'b', 'd'], ['b', 'c', 'a', 'd'], ['b', 'a', 'c', 'd'], ['c', 'b', 'd', 'a']]
-    # t = 4
-    # cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
-    # cud.deploy_algorithm()
+    # app.run(debug=True)
+    v = (1, 2, 3)
+    v_type = (1, 1, 1)
+    alters = ('a', 'b', 'c')
+    df_alter = 'null'
+    vp =[['a', 'b', 'c'], ['b', 'c', 'a'], ['c', 'a', 'b']]
+    t = 3
+    cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
+    cud.deploy_algorithm()
+    # print(cud.data)
