@@ -127,6 +127,7 @@ class ConsensusUnderDeadline():
         self.remaining_rounds = remaining_rounds
         self.random_selection = random_selection
         self.data = [] # holds data to client side
+        self.last_voter_change = {} # the last voter to change is vote
 
     def deploy_algorithm(self):
         '''
@@ -177,7 +178,9 @@ class ConsensusUnderDeadline():
         for i, pref in enumerate(self.voters_preferences):
             logger.info('voter %s preference: %s', i+1, pref)
         logger.info('round number: %g', self.remaining_rounds)
+        current_round = 0
         while self.remaining_rounds >= 0:
+            current_round += 1
             logger.debug('voters have cast their ballots')
             self.round_passed()  # mark this round as passed
             current_votes_score = ConsensusUnderDeadline.votes_calculate(
@@ -188,9 +191,10 @@ class ConsensusUnderDeadline():
                     'round': self.remaining_rounds + 1,
                     'voters_ballot': copy.deepcopy(self.voters_current_ballot),
                     'scores': current_votes_score,
-                    'possible_winners': possible_winners
+                    'possible_winners': possible_winners,
+                    'changed_vote': self.last_voter_change
             })
-            print(self.data)
+            self.last_voter_change = {}
             for key, value in current_votes_score.items():
                 if value == unanimously:
                     return key
@@ -224,7 +228,8 @@ class ConsensusUnderDeadline():
                 for preference in ballot_change_voter_preference:
                     if preference in possible_winners and preference != voter_current_ballot:
                         self.change_vote(
-                            ballot_change_voter, preference, voter_current_ballot)
+                            ballot_change_voter, preference, voter_current_ballot) 
+                        self.last_voter_change = {ballot_change_voter: preference}
                         break
         # if unanimously hasn't reached - return default alternative
         return self.default_alternative
@@ -397,13 +402,13 @@ class ConsensusUnderDeadline():
         return dict(Counter(ballots.values()))
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    v = (1, 2, 3)
-    v_type = (1, 1, 1)
-    alters = ('a', 'b', 'c')
-    df_alter = 'null'
-    vp =[['a', 'b', 'c'], ['b', 'c', 'a'], ['c', 'a', 'b']]
-    t = 3
-    cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
-    cud.deploy_algorithm()
+    app.run(debug=True)
+    # v = (1, 2, 3)
+    # v_type = (1, 1, 1)
+    # alters = ('a', 'b', 'c')
+    # df_alter = 'null'
+    # vp =[['a', 'b', 'c'], ['b', 'c', 'a'], ['c', 'a', 'b']]
+    # t = 3
+    # cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
+    # cud.deploy_algorithm()
     # print(cud.data)
