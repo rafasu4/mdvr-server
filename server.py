@@ -20,6 +20,7 @@ def submit():
     with open('logs.txt', 'r') as f:
         for line in f:
             if 'INFO' in line:
+                line = line.replace('INFO:root:voter ', '') 
                 logs.append(line)
     # reset the content of the log file
     with open('logs.txt', 'w'):
@@ -403,12 +404,3 @@ class ConsensusUnderDeadline():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # v = (1, 2, 3)
-    # v_type = (1, 1, 1)
-    # alters = ('a', 'b', 'c')
-    # df_alter = 'null'
-    # vp =[['a', 'b', 'c'], ['b', 'c', 'a'], ['c', 'a', 'b']]
-    # t = 3
-    # cud = ConsensusUnderDeadline(voters=v, voters_type = v_type, alternatives=alters, default_alternative=df_alter,voters_preferences=vp, remaining_rounds=t, random_selection=False)
-    # cud.deploy_algorithm()
-    # print(cud.data)
