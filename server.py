@@ -25,7 +25,7 @@ def submit():
     # reset the content of the log file
     with open('logs.txt', 'w'):
         pass
-    ans = (cud.data, winner, logs)
+    ans = (cud.data, winner, cud.convergence_time, logs)
     return jsonify(status='success', message=ans)
 
 
@@ -124,7 +124,8 @@ class ConsensusUnderDeadline():
         self.voters_current_ballot = {i + 1: voters_preferences[i][0]
                                       for i in range(len(voters_preferences))}
         if remaining_rounds < 0:
-            raise ValueError(f'''time can't be negative''')
+            raise ValueError(f'''time can't be negative'''),
+        self.convergence_time = remaining_rounds
         self.remaining_rounds = remaining_rounds
         self.random_selection = random_selection
         self.data = [] # holds data to client side
@@ -188,6 +189,7 @@ class ConsensusUnderDeadline():
                 self.voters_current_ballot)
              # all the alternative who's possible to be elected
             possible_winners = self.possible_winners()
+            self.convergence_time = self.convergence_time - self.remaining_rounds
             self.data.append({
                     'round': self.remaining_rounds + 1,
                     'voters_ballot': copy.deepcopy(self.voters_current_ballot),
@@ -233,6 +235,7 @@ class ConsensusUnderDeadline():
                         self.last_voter_change = {ballot_change_voter: preference}
                         break
         # if unanimously hasn't reached - return default alternative
+        self.convergence_time = self.convergence_time - self.remaining_rounds
         return self.default_alternative
 
     def round_passed(self):
