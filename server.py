@@ -124,7 +124,7 @@ class ConsensusUnderDeadline():
         self.voters_current_ballot = {i + 1: voters_preferences[i][0]
                                       for i in range(len(voters_preferences))}
         if remaining_rounds < 0:
-            raise ValueError(f'''time can't be negative'''),
+            raise ValueError(f'''time can't be negative''')
         self.convergence_time = remaining_rounds
         self.remaining_rounds = remaining_rounds
         self.random_selection = random_selection
