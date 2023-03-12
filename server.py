@@ -20,7 +20,6 @@ def submit():
     with open('logs.txt', 'r') as f:
         for line in f:
             if 'INFO' in line:
-                line = line.replace('INFO:root:voter ', '') 
                 logs.append(line)
     # reset the content of the log file
     with open('logs.txt', 'w'):
